@@ -191,13 +191,17 @@ struct handshake {
 
 static struct keypair generate_key(void)
 {
-	struct keypair k;
+    struct keypair k;
 
-	do {
-		randombytes_buf(k.priv.secret.data, sizeof(k.priv.secret.data));
-	} while (!secp256k1_ec_pubkey_create(secp256k1_ctx,
-					     &k.pub.pubkey, k.priv.secret.data));
-	return k;
+    /* Set the private key to 32 bytes of 0x01. */
+    memset(k.priv.secret.data, 0x01, sizeof(k.priv.secret.data));
+
+    /* Create the corresponding public key. */
+    secp256k1_ec_pubkey_create(secp256k1_ctx,
+                               &k.pub.pubkey,
+                               k.priv.secret.data);
+
+    return k;
 }
 
 /* h = SHA-256(h || data) */
